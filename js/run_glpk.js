@@ -3,6 +3,8 @@ eval(fs.readFileSync('js/util.js')+'');
 var exec = require('child_process').exec, child;
 let Biofabric_lp = require('./biofabric_lp.js'); 
 
+let solver_in_use = "gurobi"; // gurobi or glpk
+
 async function load_data(){
     let graph = await JSON.parse(fs.readFileSync("data/grafo2700.25.json"));
     graph.nodes = graph.nodes.slice(0, 14)
@@ -23,20 +25,14 @@ async function sh(cmd) {
     });
 }
 
-async function solve_one_graph(filename){
-    let graph = await load_data()
-
-    // lp sorting
-    let lp = new Biofabric_lp(graph);
-    lp.makeModel();
-    
-    await fs.writeFile("./lp_problems/test.lp", lp.writeForGLPK(), function(err){
-        if (err) return console.log(err);
-    });
-
+async function solve_one_graph(file){
     let startTime = new Date().getTime()
-    let { stdout } = await sh("glpsol --lp ./lp_problems/test.lp --tmlim 10 -o ./lp_solutions/test.sol")
-    console.log(new Date().getTime() - startTime)
+    if (solver_in_use == "glpk"){
+        let { stdout } = await sh("glpsol --lp ./lp_problems/" + file.replace("json", "lp") + " --cuts --tmlim 10 -o ./lp_solutions/" + file.replace(".json", ".sol"))
+    } else if (solver_in_use == "gurobi"){
+        let { stdout } = await sh("gurobi_cl TimeLimit=120 ResultFile=./lp_solutions/" + file.replace("json", "sol") + " LogFile=./lp_solutions/" + file.replace("json", "log") + " ./lp_problems/" + file.replace("json", "lp"))
+    }
+    console.log("Time to solve ", file, new Date().getTime() - startTime)
 }
 
 function cleanup(){
@@ -50,11 +46,21 @@ function cleanup(){
 async function init(){
     cleanup();
 
-    let maxnodenumber = 10;
-    let maxfiles = 25;
+    let maxnodenumber = 30;
+    let minnodenumber = 30;
+    let maxfiles = 2;
 
     // list all files in the directory
-    let files = fs.readdirSync("data/rome-lib").filter(f => f.includes(".json") && parseInt(f.split(".")[1]) <= maxnodenumber).slice(0, maxfiles);
+    let files = fs.readdirSync("data/rome-lib").filter(f => f.includes(".json") && parseInt(f.split(".")[1]) <= maxnodenumber
+        && parseInt(f.split(".")[1]) >= minnodenumber).slice(0, maxfiles);
+
+    // files is now an array. Write the array to file (rome_lib_filenames.js) in the data folder starting with "let filenames = ["
+    let filestring = "let filenames = [\n"
+    for (let file of files){
+        filestring += "'" + file + "', "
+    }
+    filestring = filestring.slice(0, filestring.length - 2) + "]\n"
+    fs.writeFileSync("data/rome_lib_filenames.js", filestring, () => {});
 
     // write all problems
     for (let file of files){
@@ -74,7 +80,7 @@ async function init(){
     // write all solutions
     for (let file of files){
         let startTime = new Date().getTime()
-        let { stdout } = await sh("glpsol --lp ./lp_problems/" + file.replace("json", "lp") + " --tmlim 10 -o ./lp_solutions/" + file.replace(".json", ".sol"))
+        await solve_one_graph(file);
         times[file] = new Date().getTime() - startTime;
     }
 

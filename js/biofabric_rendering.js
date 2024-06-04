@@ -2,10 +2,12 @@ function render_biofabric(graph, ordernodes, orderedges, result, nodetitle, edge
   
     let svgwidth = 500;
     let svgheight = 500;
-    let padding = {left: 30, right: 20, top: (print_title? 40 : 20), bottom: 20}
-    let color_by_staircase = false;
+    let padding = {left: 30, right: 20, top: (print_title? 40 : 20), bottom: 50}
+    let color_by_staircase = true;
     let show_node_indices = true;
     let show_edge_indices = true;
+
+    console.log("result received", result)
     
     const svg = d3.create('svg')
         .attr("viewBox", [0, 0, svgwidth, svgheight])
@@ -65,7 +67,7 @@ function render_biofabric(graph, ordernodes, orderedges, result, nodetitle, edge
           else {
             let possible_stair = result.stairs.find(s => s.includes(orderedges[i]))
             if (possible_stair != undefined) {
-              let stairquality = compute_individual_stair_quality(possible_stair, graph, ordernodes, orderedges)
+              let stairquality = 1 //compute_individual_stair_quality(possible_stair, graph, ordernodes, orderedges)
               return d3.interpolateHsl(...["gray", "#F3722C"])(stairquality)
             }
             else if (result.escalators != undefined){
@@ -158,6 +160,12 @@ function render_biofabric(graph, ordernodes, orderedges, result, nodetitle, edge
         .style("text-anchor", "start")
         .style("fill", "lightgray")
         .text(orderedges[i])
+
+      svg.append("text")
+        .attr("x", svgwidth/2)
+        .attr("y", svgheight - 30)
+        .attr("text-anchor", "middle")
+        .text("quality: " + Math.round(result.stairQualities[result.stairQualities.length - 1]*100)/100)
     }
     
     

@@ -127,6 +127,7 @@ class Biofabric_lp{
         // compute objective values
         for (let n of this.g.nodes){
             let adjacent_edges = this.g.links.filter(e => e.source == n.id || e.target == n.id)
+            if (adjacent_edges.length < 3) continue;
             for (let i = 0; i < adjacent_edges.length; i++){
                 for (let j = 0; j < adjacent_edges.length; j++){
                     if (i == j) continue;
@@ -257,6 +258,24 @@ class Biofabric_lp{
                 const evt = new Event('solution_reading_complete');
                 document.dispatchEvent(evt)
             })
+    }
+
+    async readFromGurobi(filename){
+        await fetch(filename)
+            .then(response => response.text())
+            .then(text => {
+                this.result = {};
+
+                for (let i in text.split("\n")){
+                    const match = text.split("\n")[i].split(" ")
+                    this.result[match[0]] = parseFloat(match[1])
+                }
+                this.apply_solution();
+
+                const evt = new Event('solution_reading_complete');
+                document.dispatchEvent(evt)
+            })
+    
     }
 }
 
