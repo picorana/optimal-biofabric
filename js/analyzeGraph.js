@@ -13,7 +13,7 @@ function analyzeGraph(nodes, edges) {
         //runwayQualities: [],
     }
 
-    stepSize = 10;
+    stepSize = nodes.length;
     timekeeping = false;
     consoleLogging = false;
     structureSize = 3;
@@ -178,7 +178,7 @@ function analyzeGraph(nodes, edges) {
 
                         let denominator = stair.length * d_diff;
 
-                        all_stairs_quality += completeness * (1 - topsum / denominator)
+                        all_stairs_quality += completeness // * (1 - topsum / denominator)
                     })
                     return all_stairs_quality
                 }

@@ -30,7 +30,7 @@ async function solve_one_graph(file){
     if (solver_in_use == "glpk"){
         let { stdout } = await sh("glpsol --lp ./lp_problems/" + file.replace("json", "lp") + " --cuts --tmlim 10 -o ./lp_solutions/" + file.replace(".json", ".sol"))
     } else if (solver_in_use == "gurobi"){
-        let { stdout } = await sh("gurobi_cl TimeLimit=120 ResultFile=./lp_solutions/" + file.replace("json", "sol") + " LogFile=./lp_solutions/" + file.replace("json", "log") + " ./lp_problems/" + file.replace("json", "lp"))
+        let { stdout } = await sh("gurobi_cl TimeLimit=100 ResultFile=./lp_solutions/" + file.replace("json", "sol") + " LogFile=./lp_solutions/" + file.replace("json", "log") + " ./lp_problems/" + file.replace("json", "lp"))
     }
     console.log("Time to solve ", file, new Date().getTime() - startTime)
 }
@@ -48,11 +48,14 @@ async function init(){
 
     let maxnodenumber = 30;
     let minnodenumber = 30;
-    let maxfiles = 2;
+    let maxfiles = 3;
 
     // list all files in the directory
     let files = fs.readdirSync("data/rome-lib").filter(f => f.includes(".json") && parseInt(f.split(".")[1]) <= maxnodenumber
         && parseInt(f.split(".")[1]) >= minnodenumber).slice(0, maxfiles);
+
+    // filter out grafo1.json
+    files = files.filter(f => !f.includes("1013.15"))
 
     // files is now an array. Write the array to file (rome_lib_filenames.js) in the data folder starting with "let filenames = ["
     let filestring = "let filenames = [\n"

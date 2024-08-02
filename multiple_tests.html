@@ -119,16 +119,16 @@ async function init(){
             .then(response => response.text())
             .then(text => {
               // append first 10 lines of the solution file
-              let lines = text.split("\n")
-              let sol = lines.slice(0, 5).join("<br>")
-              datadiv.innerHTML = sol
+              // let lines = text.split("\n")
+              // let sol = lines.slice(0, 5).join("<br>")
+              // datadiv.innerHTML = sol
 
               // append execution time
               let time = times[filename]
               if (time){
                 datadiv.innerHTML += "<br>Running time: " + (parseFloat(time)/1000) + " s"
                 // if time is > 1000, add in bold and red "timed out"
-                if (parseFloat(time) > 10000){
+                if (parseFloat(time) > 100000){
                   datadiv.innerHTML += "<br><b><font color='red'>Timed out</font></b>"
                 }
               }
