@@ -42,3 +42,11 @@ function sortByDegree(nodes, edges) {
         return (count(a.id) < count(b.id)) ? 1 : (count(b.id) < count(a.id) ? -1 : 0);
     });
 }
+
+try {
+    module.exports = {
+        sortForStaircases,
+        sortByDegree
+    }
+} catch (e) {
+}

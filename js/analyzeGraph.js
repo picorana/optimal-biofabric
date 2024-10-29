@@ -126,7 +126,6 @@ function analyzeGraph(nodes, edges) {
 
                 result_template.stairQualities = stairQualities;
 
-                console.log("result template", result_template)
                 return result_template
 
 
